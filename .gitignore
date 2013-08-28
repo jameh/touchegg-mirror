@@ -1,0 +1,6 @@
+documentation/html
+*.o
+moc_*
+documentation/log
+Makefile
+cut
