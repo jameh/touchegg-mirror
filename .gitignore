@@ -4,3 +4,4 @@ moc_*
 documentation/log
 Makefile
 cut
+.tags
