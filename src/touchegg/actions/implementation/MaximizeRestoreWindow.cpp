@@ -40,7 +40,7 @@ MaximizeRestoreWindow::MaximizeRestoreWindow(const QString &settings, Window win
         this->maximize = false;
     }
     else {
-        qWarning() << "Error reading CHANGE_VIEWPORT settings, using the default settings";
+        qWarning() << "Error reading MAXIMIZE_RESTORE_WINDOW settings, using the default settings";
         this->toggle = true;
     }
 }
