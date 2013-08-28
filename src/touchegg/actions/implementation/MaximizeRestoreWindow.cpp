@@ -25,7 +25,25 @@
 // ****************************************************************************************************************** //
 
 MaximizeRestoreWindow::MaximizeRestoreWindow(const QString &settings, Window window)
-    : Action(settings, window) {}
+    : Action(settings, window)
+{
+    if (settings == "TOGGLE") {
+        this->toggle = true;
+        // leave this->maximize uninitialized
+    }
+    else if (settings == "MAXIMIZE") {
+        this->toggle = false;
+        this->maximize = true;
+    }
+    else if (settings == "RESTORE") {
+        this->toggle = false;
+        this->maximize = false;
+    }
+    else {
+        qWarning() << "Error reading CHANGE_VIEWPORT settings, using the default settings";
+        this->toggle = true;
+    }
+}
 
 
 // ****************************************************************************************************************** //
@@ -65,18 +83,20 @@ void MaximizeRestoreWindow::executeFinish(const QHash<QString, QVariant>&)
     bool maximized = maxHor && maxVert;
     XFree(propRet);
 
-    // If the window is maximized restore it
-    XClientMessageEvent event;
-    event.window = this-> window;
-    event.type = ClientMessage;
-    event.message_type = XInternAtom(QX11Info::display(), "_NET_WM_STATE", false);
-    event.format = 32;
-    event.data.l[0] = maximized ? 0 : 1;
-    event.data.l[1] = atomMaxVert;
-    event.data.l[2] = atomMaxHorz;
+    if (this->toggle || (this->maximize && !maximized) || (!this->maximize && maximized)) {
+        // If the window is maximized restore it
+        XClientMessageEvent event;
+        event.window = this->window;
+        event.type = ClientMessage;
+        event.message_type = XInternAtom(QX11Info::display(), "_NET_WM_STATE", false);
+        event.format = 32;
+        event.data.l[0] = maximized ? 0 : 1;
+        event.data.l[1] = atomMaxVert;
+        event.data.l[2] = atomMaxHorz;
 
-    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(QX11Info::appScreen()), false,
-            (SubstructureNotifyMask | SubstructureRedirectMask), (XEvent *)&event);
-    XFlush(QX11Info::display());
+        XSendEvent(QX11Info::display(), QX11Info::appRootWindow(QX11Info::appScreen()), false,
+                (SubstructureNotifyMask | SubstructureRedirectMask), (XEvent *)&event);
+        XFlush(QX11Info::display());
+    }
 }
 

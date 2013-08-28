@@ -39,6 +39,11 @@ public:
     void executeUpdate(const QHash<QString, QVariant>& attrs);
 
     void executeFinish(const QHash<QString, QVariant>& attrs);
+
+private:
+	bool toggle;
+	bool maximize;
+
 };
 
 #endif // MAXIMIZERESTOREWINDOW_H
