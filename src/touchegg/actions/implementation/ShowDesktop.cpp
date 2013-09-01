@@ -25,7 +25,24 @@
 // ****************************************************************************************************************** //
 
 ShowDesktop::ShowDesktop(const QString &settings, Window window)
-    : Action(settings, window) {}
+    : Action(settings, window)
+{
+    if (settings == "TOGGLE") {
+        this->toggle = true;
+    }
+    else if (settings == "SHOW") {
+        this->show = true;
+        this->toggle = false;
+    }
+    else if (settings == "UNSHOW") {
+        this->show = false;
+        this->toggle = false;
+    }
+    else {
+        qWarning() << "Using the default settings (TOGGLE)";
+        this->toggle = true;
+    }
+}
 
 
 // ****************************************************************************************************************** //
@@ -54,15 +71,16 @@ void ShowDesktop::executeFinish(const QHash<QString, QVariant>& /*attrs*/)
     bool isShowingDesktop = *((bool *) propRet);
     XFree(propRet);
 
-    // Minimize or restore the windows
-    XClientMessageEvent event;
-    event.window = QX11Info::appRootWindow(QX11Info::appScreen());
-    event.type = ClientMessage;
-    event.message_type = XInternAtom(QX11Info::display(), "_NET_SHOWING_DESKTOP", false);
-    event.format = 32;
-    event.data.l[0] = !isShowingDesktop;
-
-    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(QX11Info::appScreen()), false,
-            (SubstructureNotifyMask | SubstructureRedirectMask), (XEvent *)&event);
-    XFlush(QX11Info::display());
+    if (this->toggle || this->show == !isShowingDesktop) {
+        // Minimize or restore the windows
+        XClientMessageEvent event;
+        event.window = QX11Info::appRootWindow(QX11Info::appScreen());
+        event.type = ClientMessage;
+        event.message_type = XInternAtom(QX11Info::display(), "_NET_SHOWING_DESKTOP", false);
+        event.format = 32;
+        event.data.l[0] = !isShowingDesktop;
+        XSendEvent(QX11Info::display(), QX11Info::appRootWindow(QX11Info::appScreen()), false,
+                (SubstructureNotifyMask | SubstructureRedirectMask), (XEvent *)&event);
+        XFlush(QX11Info::display());
+    }
 }
