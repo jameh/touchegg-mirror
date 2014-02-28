@@ -32,7 +32,7 @@ class MinimizeWindow : public Action
 
 public:
 
-    MinimizeWindow(const QString &settings, Window window);
+    MinimizeWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

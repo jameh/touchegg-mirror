@@ -32,7 +32,7 @@ class ShowDesktop : public Action
 
 public:
 
-    ShowDesktop(const QString &settings, Window window);
+    ShowDesktop(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

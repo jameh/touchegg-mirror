@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-ResizeWindow::ResizeWindow(const QString &settings, Window window)
-    : Action(settings, window) {}
+ResizeWindow::ResizeWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type) {}
 
 
 // ****************************************************************************************************************** //

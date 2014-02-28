@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-MaximizeRestoreWindow::MaximizeRestoreWindow(const QString &settings, Window window)
-    : Action(settings, window)
+MaximizeRestoreWindow::MaximizeRestoreWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     if (settings == "TOGGLE") {
         this->toggle = true;

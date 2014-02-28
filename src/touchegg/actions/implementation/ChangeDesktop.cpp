@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-ChangeDesktop::ChangeDesktop(const QString &settings, Window window)
-    : Action(settings, window)
+ChangeDesktop::ChangeDesktop(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     this->next = true;
 

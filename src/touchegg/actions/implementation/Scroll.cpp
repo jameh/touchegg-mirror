@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-Scroll::Scroll(const QString &settings, Window window)
-    : Action(settings, window),
+Scroll::Scroll(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type),
       horizontalSpeed(30),
       verticalSpeed(30),
       upScrollSpace(0),

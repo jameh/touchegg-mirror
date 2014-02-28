@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-MoveWindow::MoveWindow(const QString &settings, Window window)
-    : Action(settings, window) {}
+MoveWindow::MoveWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type) {}
 
 
 // ****************************************************************************************************************** //

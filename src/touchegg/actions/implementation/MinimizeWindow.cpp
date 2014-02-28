@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-MinimizeWindow::MinimizeWindow(const QString &settings, Window window)
-    : Action(settings, window) {}
+MinimizeWindow::MinimizeWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type) {}
 
 
 // ****************************************************************************************************************** //

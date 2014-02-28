@@ -46,6 +46,8 @@ public:
      */
     virtual ~GestureHandler();
 
+    
+
 public slots:
 
     /**
@@ -69,6 +71,7 @@ private slots:
      * Run the taps that have not proven to be a composed gesture.
      */
     void executeTap();
+    void executeSafeTap();
 
 private:
 
@@ -87,6 +90,8 @@ private:
         bool isComposedGesture) const;
 
     //------------------------------------------------------------------------------------------------------------------
+    void updateCurrentGesture(const QString &type, int id, const QHash<QString, QVariant>& attrs);
+    void executeCompoundGesture(Gesture* gesture);
 
     /**
      * Returns window over the gestures is make.
@@ -117,11 +122,6 @@ private:
     Gesture *currentGesture;
 
     /**
-     * Timer that running the taps always that the gesture does not prove to be a composed gesture.
-     */
-    QTimer *timerTap;
-
-    /**
      * Factory to create gestures.
      */
     GestureFactory *gestureFact;
@@ -135,6 +135,9 @@ private:
      * Provides access to the configuration.
      */
     Config *config;
+
+    long timeout;
+    bool consumeNextTap;
 
 };
 

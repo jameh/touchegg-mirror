@@ -32,7 +32,7 @@ class MoveWindow : public Action
 
 public:
 
-    MoveWindow(const QString &settings, Window window);
+    MoveWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-ShowDesktop::ShowDesktop(const QString &settings, Window window)
-    : Action(settings, window)
+ShowDesktop::ShowDesktop(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     if (settings == "TOGGLE") {
         this->toggle = true;

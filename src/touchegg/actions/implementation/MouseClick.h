@@ -32,7 +32,7 @@ class MouseClick : public Action
 
 public:
 
-    MouseClick(const QString &settings, Window window);
+    MouseClick(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 
@@ -46,6 +46,11 @@ private:
      * Button to emulate.
      */
     int button;
+    
+    /**
+     *  Boolean to check click status.
+     */
+    bool sending_click;
 
 };
 #endif // LEFTBUTTONCLICK_H

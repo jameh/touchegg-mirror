@@ -32,7 +32,7 @@ class Scroll : public Action
 
 public:
 
-    Scroll(const QString &settings, Window window);
+    Scroll(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

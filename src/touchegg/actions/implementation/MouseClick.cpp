@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-MouseClick::MouseClick(const QString &settings, Window window)
-    : Action(settings, window)
+MouseClick::MouseClick(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     this->button = 1;
 
@@ -53,6 +53,7 @@ void MouseClick::executeUpdate(const QHash<QString, QVariant>& /*attrs*/) {}
 
 void MouseClick::executeFinish(const QHash<QString, QVariant>& /*attrs*/)
 {
+    // Update this value before click to avoid race condition
     XTestFakeButtonEvent(QX11Info::display(), this->button, true, 0);
     XTestFakeButtonEvent(QX11Info::display(), this->button, false, 0);
     XFlush(QX11Info::display());

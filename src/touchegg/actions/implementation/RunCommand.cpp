@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-RunCommand::RunCommand(const QString &settings, Window window)
-    : Action(settings, window)
+RunCommand::RunCommand(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     this->command = settings;
 }

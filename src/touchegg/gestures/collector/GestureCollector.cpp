@@ -31,7 +31,7 @@ void GestureCollector::gestureStart(GestureCollector *gc, GeisEvent event)
     // "type" is GEIS_GESTURE_TAP, GEIS_GESTURE_DRAG...
     QHash<QString, QVariant> attrs = getGestureAttrs(event);
     QString type = attrs.value(GEIS_GESTURE_ATTRIBUTE_GESTURE_NAME).toString();
-    int id = attrs.value("geis gesture class id").toInt();
+    int id = attrs.value("id").toInt();
     emit gc->executeGestureStart(type, id, attrs);
 }
 
@@ -39,7 +39,7 @@ void GestureCollector::gestureUpdate(GestureCollector *gc, GeisEvent event)
 {
     QHash<QString, QVariant> attrs = getGestureAttrs(event);
     QString type = attrs.value(GEIS_GESTURE_ATTRIBUTE_GESTURE_NAME).toString();
-    int id = attrs.value("geis gesture class id").toInt();
+    int id = attrs.value("id").toInt();
     emit gc->executeGestureUpdate(type, id, attrs);
 }
 
@@ -47,7 +47,7 @@ void GestureCollector::gestureFinish(GestureCollector *gc, GeisEvent event)
 {
     QHash<QString, QVariant> attrs = getGestureAttrs(event);
     QString type = attrs.value(GEIS_GESTURE_ATTRIBUTE_GESTURE_NAME).toString();
-    int id = attrs.value("geis gesture class id").toInt();
+    int id = attrs.value("id").toInt();
     emit gc->executeGestureFinish(type, id, attrs);
 }
 
@@ -216,17 +216,22 @@ QHash<QString, QVariant> GestureCollector::getGestureAttrs(GeisEvent event)
 
     GeisAttr attr = geis_event_attr_by_name(event,
             GEIS_EVENT_ATTRIBUTE_GROUPSET);
+
     GeisGroupSet groupset = (GeisGroupSet)geis_attr_value_to_pointer(attr);
 
     for (GeisSize i = 0; i < geis_groupset_group_count(groupset); ++i) {
         GeisSize j;
         GeisGroup group = geis_groupset_group(groupset, i);
+	GeisSize frame_count = geis_group_frame_count(group);
+	
+	if (i==0) ret.insert("id", geis_group_id(group));
 
-        for (j = 0; j < geis_group_frame_count(group); ++j) {
+        for (j = 0; j < frame_count; ++j) {
             GeisSize k;
             GeisFrame frame = geis_group_frame(group, j);
             GeisSize attr_count = geis_frame_attr_count(frame);
-
+	    
+            // Grab the frame attributes
             for (k = 0; k < attr_count; ++k) {
                 GeisAttr gestureAttr = geis_frame_attr(frame, k);
                 QString attrName = geis_attr_name(gestureAttr);
@@ -238,8 +243,8 @@ QHash<QString, QVariant> GestureCollector::getGestureAttrs(GeisEvent event)
                     continue;
                 if (attrName == GEIS_GESTURE_ATTRIBUTE_CHILD_WINDOW_ID)
                     continue;
-
-                switch (geis_attr_type(gestureAttr)) {
+                
+		switch (geis_attr_type(gestureAttr)) {
                 case GEIS_ATTR_TYPE_BOOLEAN:
                     value = geis_attr_value_to_boolean(gestureAttr);
                     break;
@@ -267,7 +272,7 @@ QHash<QString, QVariant> GestureCollector::getGestureAttrs(GeisEvent event)
                 if (geis_frame_is_class(frame, gestureClass)) {
                     ret.insert(GEIS_GESTURE_ATTRIBUTE_GESTURE_NAME,
                         geis_gesture_class_name(gestureClass));
-
+                    ret.insert("id", geis_gesture_class_id(gestureClass));
                     break;
                 }
             }

@@ -32,7 +32,7 @@ class DragAndDrop : public Action
 
 public:
 
-    DragAndDrop(const QString &settings, Window window);
+    DragAndDrop(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

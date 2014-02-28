@@ -22,6 +22,7 @@
 #define ACTION_H
 
 #include "src/touchegg/util/Include.h"
+#include "src/touchegg/actions/types/ActionTypeEnum.h"
 
 /**
  * Class that should inherit all actions. Actions are operations associated with
@@ -39,7 +40,13 @@ public:
      */
     Action(const QString &settings, Window window)
         : settings(settings),
-          window(window) {}
+          window(window),
+	  type(ActionTypeEnum::NO_ACTION) {}
+    
+    Action(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+        : settings(settings),
+          window(window),
+	  type(type) {}
 
     virtual ~Action() {}
 
@@ -64,6 +71,14 @@ public:
      */
     virtual void executeFinish(const QHash<QString, QVariant>& attrs) = 0;
 
+    /**
+     * Returns the type of action represented.
+     * @returns type of action. 
+     */
+    ActionTypeEnum::ActionType getType() {
+        return this->type;
+    }
+
 protected:
 
     /**
@@ -75,7 +90,11 @@ protected:
      * Window on which execute the action.
      */
     Window window;
-
+    
+    /**
+     * Action type.
+     */
+    ActionTypeEnum::ActionType type;
 };
 
 #endif // ACTION_H

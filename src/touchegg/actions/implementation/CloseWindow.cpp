@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-CloseWindow::CloseWindow(const QString &settings, Window window)
-    : Action(settings, window) {}
+CloseWindow::CloseWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type) {}
 
 
 // ****************************************************************************************************************** //

@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-ChangeViewport::ChangeViewport(const QString &settings, Window window)
-    : Action(settings, window)
+ChangeViewport::ChangeViewport(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     this->next = true;
 
