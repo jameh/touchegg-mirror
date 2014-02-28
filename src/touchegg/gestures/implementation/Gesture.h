@@ -75,6 +75,14 @@ public:
      * @return The type.
      */
     GestureTypeEnum::GestureType getType() const;
+    
+    /**
+     * Returns the action type.
+     * @return The action type.
+     */
+    ActionTypeEnum::ActionType getActionType() const;
+
+     
 
     /**
      * Returns the number of fingers used by the gesture.

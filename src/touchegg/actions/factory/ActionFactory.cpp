@@ -47,43 +47,43 @@ Action *ActionFactory::createAction(ActionTypeEnum::ActionType actionType,
         return NULL;
 
     case ActionTypeEnum::MOUSE_CLICK:
-        return new MouseClick(settings, window);
+        return new MouseClick(settings, window, actionType);
 
     case ActionTypeEnum::SCROLL:
-        return new Scroll(settings, window);
+        return new Scroll(settings, window, actionType);
 
     case ActionTypeEnum::MINIMIZE_WINDOW:
-        return new MinimizeWindow(settings, window);
+        return new MinimizeWindow(settings, window, actionType);
 
     case ActionTypeEnum::MAXIMIZE_RESTORE_WINDOW:
-        return new MaximizeRestoreWindow(settings, window);
+        return new MaximizeRestoreWindow(settings, window, actionType);
 
     case ActionTypeEnum::CLOSE_WINDOW:
-        return new CloseWindow(settings, window);
+        return new CloseWindow(settings, window, actionType);
 
     case ActionTypeEnum::RESIZE_WINDOW:
-        return new ResizeWindow(settings, window);
+        return new ResizeWindow(settings, window, actionType);
 
     case ActionTypeEnum::SHOW_DESKTOP:
-        return new ShowDesktop(settings, window);
+        return new ShowDesktop(settings, window, actionType);
 
     case ActionTypeEnum::CHANGE_DESKTOP:
-        return new ChangeDesktop(settings, window);
+        return new ChangeDesktop(settings, window, actionType);
 
     case ActionTypeEnum::CHANGE_VIEWPORT:
-        return new ChangeViewport(settings, window);
+        return new ChangeViewport(settings, window, actionType);
 
     case ActionTypeEnum::SEND_KEYS:
-        return new SendKeys(settings, window);
+        return new SendKeys(settings, window, actionType);
 
     case ActionTypeEnum::MOVE_WINDOW:
-        return new MoveWindow(settings, window);
+        return new MoveWindow(settings, window, actionType);
 
     case ActionTypeEnum::RUN_COMMAND:
-        return new RunCommand(settings, window);
+        return new RunCommand(settings, window, actionType);
 
     case ActionTypeEnum::DRAG_AND_DROP:
-        return new DragAndDrop(settings, window);
+        return new DragAndDrop(settings, window, actionType);
 
     default:
         return NULL;

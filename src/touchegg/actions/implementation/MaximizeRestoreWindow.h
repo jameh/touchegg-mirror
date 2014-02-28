@@ -32,7 +32,7 @@ class MaximizeRestoreWindow : public Action
 
 public:
 
-    MaximizeRestoreWindow(const QString &settings, Window window);
+    MaximizeRestoreWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

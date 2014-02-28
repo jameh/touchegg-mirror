@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-SendKeys::SendKeys(const QString &settings, Window window)
-    : Action(settings, window)
+SendKeys::SendKeys(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     // Read the keys to send from te configuration
     QStringList keys = settings.split("+");

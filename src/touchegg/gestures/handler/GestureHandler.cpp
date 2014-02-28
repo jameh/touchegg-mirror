@@ -20,25 +20,33 @@
  */
 #include "GestureHandler.h"
 
+#include <pthread.h>
+
+// Lock to be used with Tap gestures
+pthread_mutex_t gestureLock = PTHREAD_MUTEX_INITIALIZER;
+
 // ****************************************************************************************************************** //
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
+
 GestureHandler::GestureHandler(QObject *parent)
     : QObject(parent),
       currentGesture(NULL),
-      timerTap(new QTimer(this)),
       gestureFact(GestureFactory::getInstance()),
       actionFact(ActionFactory::getInstance()),
       config(Config::getInstance())
 {
-    this->timerTap->setInterval(this->config->getComposedGesturesTime());
-    connect(this->timerTap, SIGNAL(timeout()), this, SLOT(executeTap()));
+    this->timeout = this->config->getComposedGesturesTime();
+    this->consumeNextTap = false;
 }
 
 GestureHandler::~GestureHandler()
 {
-    delete this->currentGesture;
+    pthread_mutex_lock(&gestureLock); 
+    if (this->currentGesture)
+	    delete this->currentGesture;
+    pthread_mutex_unlock(&gestureLock); 
 }
 
 
@@ -49,93 +57,120 @@ GestureHandler::~GestureHandler()
 void GestureHandler::executeGestureStart(const QString &type, int id, const QHash<QString, QVariant>& attrs)
 {
     // If not gesture is running create one
+    pthread_mutex_lock(&gestureLock); 
     if (this->currentGesture == NULL) {
         this->currentGesture = this->createGesture(type, id, attrs, false);
         if (this->currentGesture != NULL) {
-            qDebug() << "\tGesture Start" << id << type;
+	    qDebug() << "\tStarting " << type;
             this->currentGesture->start();
         }
+    } else if (this->currentGesture->getId() == id) {
+        qDebug() << "\tUpdating " << type;
+	this->currentGesture->setAttrs(attrs);	
+	this->currentGesture->update();	
     }
+    pthread_mutex_unlock(&gestureLock); 
 }
+
+void GestureHandler::executeCompoundGesture(Gesture* gesture)
+{
+    qDebug() << "\tStarting compound gesture.";
+    gesture->start();
+
+    qDebug() << "\tUpdating compound gesture";
+    gesture->update();
+
+    // This is as far as Tap & Hold needs to go.
+    if (gesture->getType() == GestureTypeEnum::DOUBLE_TAP) { 
+	qDebug() << "\tFinishing double tap.";
+	gesture->finish();
+	delete gesture;
+	gesture = NULL;
+    } 
+    
+    delete this->currentGesture;
+    this->currentGesture = gesture;
+}
+
+
+void GestureHandler::updateCurrentGesture(const QString &type, int id, const QHash<QString, QVariant>& attrs)
+{
+    // Just update non-tap based gestures.
+    if (this->currentGesture->getType() != GestureTypeEnum::TAP) {
+        this->currentGesture->setAttrs(attrs);
+        this->currentGesture->update();
+	qDebug() << "\tUpdating " << type;
+	return;   
+    }
+
+    // Make our best attempt at upgrading a tap to a tap + hold
+    // or a double tap.
+    Gesture* gesture = this->createGesture(type, id, attrs, true);
+    if (!gesture) {
+	qDebug() << "Unrecognized gesture on update.";
+	qDebug() << "Current Gesture NOT updated.";
+        return;
+    }
+
+    int lastNumFingers = this->currentGesture->getAttrs().value(GEIS_GESTURE_ATTRIBUTE_TOUCHES).toInt();
+    int curNumFingers  = attrs.value(GEIS_GESTURE_ATTRIBUTE_TOUCHES).toInt();
+    if (lastNumFingers != curNumFingers) {
+	qDebug() << "Number of fingers has changed.";
+	qDebug() << "Current Gesture NOT updated.";
+        return;
+    }
+
+    this->executeCompoundGesture(gesture);
+}
+
 
 void GestureHandler::executeGestureUpdate(const QString &type, int id, const QHash<QString, QVariant>& attrs)
 {
-    // If is an update of the current gesture execute it
-    if (this->currentGesture != NULL && this->currentGesture->getId() == id && !this->timerTap->isActive()) {
-        qDebug() << "\tGesture Update" << id << type;
-        this->currentGesture->setAttrs(attrs);
-        this->currentGesture->update();
+    pthread_mutex_lock(&gestureLock);
+        qDebug() << "\tGestureUpdate: " << type;
+    // Consume any taps if needed.
+    if (type == "Tap" && this->consumeNextTap) {
+    	qDebug() << "\tTap consumed.";
+	this->consumeNextTap = false;
+	pthread_mutex_unlock(&gestureLock);
+	return;
+    } 
 
-    // If no gesture is running the gesture is a TAP, an unsupported gesture, or in Precise a DRAG
-    } else if (this->currentGesture == NULL) {
+    if (!this->currentGesture) {
+	this->currentGesture = this->createGesture(type, id, attrs, false);
+	if (this->currentGesture->getActionType() == ActionTypeEnum::MOUSE_CLICK) {
+		qDebug() << "\tFlagging next tap to be consumed.";
+		this->consumeNextTap = true; 
+	}
 
-        Gesture *gesture = this->createGesture(type, id, attrs, false);
-        if (gesture != NULL) {
-            this->currentGesture = gesture;
-
-            // If the gesture is a tap allow to make a tap & hold
-            if (gesture->getType() == GestureTypeEnum::TAP) {
-                this->timerTap->start();
-
-            // In Precise the DeltaX and DeltaY attrs in start are 0. Create the Drag here
-            } else if (gesture->getType() == GestureTypeEnum::DRAG) {
-                qDebug() << "\tGesture Start";
-                this->currentGesture->start();
-                qDebug() << "\tGesture Update" << id << type;
-                this->currentGesture->update();
-            }
-        }
-
-    // If is an update whith the timer running it is a DOUBLE_TAP or a TAP_AND_HOLD
-    } else if (this->currentGesture != NULL && this->timerTap->isActive()) {
-        this->timerTap->stop();
-
-        int currentNumFingers = this->currentGesture->getAttrs().value(GEIS_GESTURE_ATTRIBUTE_TOUCHES).toInt();
-        int newNumFingers     = attrs.value(GEIS_GESTURE_ATTRIBUTE_TOUCHES).toInt();
-        Gesture *gesture      = this->createGesture(type, id, attrs, true);
-
-        if (gesture != NULL && currentNumFingers == newNumFingers) {
-
-            // TAP_AND_HOLD
-            if (gesture->getType() == GestureTypeEnum::TAP_AND_HOLD) {
-                this->currentGesture = gesture;
-
-                qDebug() << "\tGesture Start";
-                this->currentGesture->start();
-
-                qDebug() << "\tGesture Update";
-                this->currentGesture->update();
-
-            // DOUBLE_TAP
-            } else if (gesture->getType() == GestureTypeEnum::DOUBLE_TAP) {
-                this->currentGesture = gesture;
-
-                qDebug() << "\tGesture Start";
-                this->currentGesture->start();
-
-                qDebug() << "\tGesture Update";
-                this->currentGesture->update();
-
-                qDebug() << "\tGesture Finish";
-                this->currentGesture->finish();
-
-                delete this->currentGesture;
-                this->currentGesture = NULL;
-            }
-
-        }
+	if (this->currentGesture->getType() == GestureTypeEnum::TAP)
+	    QTimer::singleShot(this->timeout, this, SLOT(executeTap()));
+	else if (this->currentGesture->getType() == GestureTypeEnum::DRAG) {
+	    qDebug() << "\tDrag start.";
+	    this->currentGesture->start();
+	    qDebug() << "\tFirst drag update.";
+	    this->currentGesture->update();
+	}
+        qDebug() << "\tUpdate finished.";
+	pthread_mutex_unlock(&gestureLock);
+	return;
     }
+
+    this->updateCurrentGesture(type, id, attrs);
+    pthread_mutex_unlock(&gestureLock);
 }
 
-void GestureHandler::executeGestureFinish(const QString &/*type*/, int id, const QHash<QString, QVariant>& attrs)
+void GestureHandler::executeGestureFinish(const QString &type, int id, const QHash<QString, QVariant>& attrs)
 {
+    pthread_mutex_lock(&gestureLock);
     if (this->currentGesture != NULL && this->currentGesture->getId() == id) {
-        qDebug() << "\tGesture Finish";
+        qDebug() << "\tFinishing Gesture.";
         this->currentGesture->setAttrs(attrs);
         this->currentGesture->finish();
         delete this->currentGesture;
         this->currentGesture = NULL;
     }
+    pthread_mutex_unlock(&gestureLock);
 }
 
 
@@ -145,22 +180,44 @@ void GestureHandler::executeGestureFinish(const QString &/*type*/, int id, const
 
 void GestureHandler::executeTap()
 {
-    this->timerTap->stop();
+    pthread_mutex_lock(&gestureLock);
+    Gesture* tmp = this->currentGesture;
 
-    if (this->currentGesture != NULL) {
-        qDebug() << "\tGesture Start";
-        this->currentGesture->start();
-
-        qDebug() << "\tGesture Update";
-        this->currentGesture->update();
-
-        qDebug() << "\tGesture Finish";
-        this->currentGesture->finish();
-
-        delete this->currentGesture;
-        this->currentGesture = NULL;
+    if (tmp && tmp->getType() == GestureTypeEnum::TAP) {
+	this->currentGesture = NULL;
+        qDebug() << "\tTap Sending...";
+        pthread_mutex_unlock(&gestureLock);
+        tmp->start();
+        tmp->update();
+        tmp->finish();
+	delete tmp;
+    } else {
+        qDebug() << "\tTap was converted to a compound gesture.";
+        pthread_mutex_unlock(&gestureLock);
     }
 }
+
+void GestureHandler::executeSafeTap()
+{
+    pthread_mutex_lock(&gestureLock);
+    Gesture* tmp = this->currentGesture;
+
+    if (tmp && tmp->getType() == GestureTypeEnum::TAP) {
+	this->currentGesture = NULL;
+	this->consumeNextTap = true;
+        qDebug() << "\tTap Sending... will be consumed.";
+    	pthread_mutex_unlock(&gestureLock);
+        tmp->start();
+        tmp->update();
+        tmp->finish();
+	delete tmp;
+    } else {
+        qDebug() << "\tTap was converted to a compound gesture.";
+        pthread_mutex_unlock(&gestureLock);
+    }
+}
+
+
 
 
 // ****************************************************************************************************************** //

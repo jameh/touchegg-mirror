@@ -32,7 +32,7 @@ class ChangeViewport : public Action
 
 public:
 
-    ChangeViewport(const QString &settings, Window window);
+    ChangeViewport(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

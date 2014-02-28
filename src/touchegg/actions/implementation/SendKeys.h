@@ -32,7 +32,7 @@ class SendKeys : public Action
 
 public:
 
-    SendKeys(const QString &settings, Window window);
+    SendKeys(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

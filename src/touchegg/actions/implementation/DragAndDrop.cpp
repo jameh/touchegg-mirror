@@ -24,8 +24,8 @@
 // **********                                  CONSTRUCTORS AND DESTRUCTOR                                 ********** //
 // ****************************************************************************************************************** //
 
-DragAndDrop::DragAndDrop(const QString &settings, Window window)
-    : Action(settings, window)
+DragAndDrop::DragAndDrop(const QString &settings, Window window, ActionTypeEnum::ActionType type)
+    : Action(settings, window, type)
 {
     this->button = 1;
 

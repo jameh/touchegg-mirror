@@ -32,7 +32,7 @@ class CloseWindow : public Action
 
 public:
 
-    CloseWindow(const QString &settings, Window window);
+    CloseWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

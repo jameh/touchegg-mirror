@@ -32,7 +32,7 @@ class ChangeDesktop : public Action
 
 public:
 
-    ChangeDesktop(const QString &settings, Window window);
+    ChangeDesktop(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

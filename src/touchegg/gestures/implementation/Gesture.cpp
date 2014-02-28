@@ -73,6 +73,11 @@ GestureTypeEnum::GestureType Gesture::getType() const
     return this->type;
 }
 
+ActionTypeEnum::ActionType Gesture::getActionType() const
+{
+    return (this->action) ? this->action->getType() : ActionTypeEnum::NO_ACTION;
+}
+
 int Gesture::getNumFingers() const
 {
     return this->numFingers;

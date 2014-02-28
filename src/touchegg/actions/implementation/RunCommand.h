@@ -33,7 +33,7 @@ class RunCommand : public Action
 
 public:
 
-    RunCommand(const QString &settings, Window window);
+    RunCommand(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 

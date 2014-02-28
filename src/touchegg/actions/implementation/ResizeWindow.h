@@ -32,7 +32,7 @@ class ResizeWindow : public Action
 
 public:
 
-    ResizeWindow(const QString &settings, Window window);
+    ResizeWindow(const QString &settings, Window window, ActionTypeEnum::ActionType type);
 
     void executeStart(const QHash<QString, QVariant>& attrs);
 
